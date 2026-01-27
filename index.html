@@ -69,6 +69,8 @@ body.dark-mode .bg-overlay {
     place-items: center;
     cursor: pointer;
     transition: transform 0.2s ease;
+    outline: none;                     
+    -webkit-tap-highlight-color: transparent; /* fix blue highlight */
 }
 .dark-mode-btn:hover { transform: scale(1.1); }
 .dark-mode-btn:active { transform: scale(0.95); }
@@ -166,7 +168,7 @@ video, canvas {
     overflow: hidden;
     transition: transform 0.2s ease;
     outline: none;                     
-    -webkit-tap-highlight-color: transparent; /* fixed blue highlight */
+    -webkit-tap-highlight-color: transparent; /* fix blue highlight */
 }
 .pill button:hover { transform: scale(1.08); }
 .pill button:active { transform: scale(0.95); }
@@ -202,7 +204,6 @@ video, canvas {
     position: fixed;
     left: 50%;
     transform: translateX(-50%);
-    bottom: 180px;  /* moved toast further down */
     background: rgba(255,255,255,0.8);
     padding: 8px 16px;
     border-radius: 999px;
@@ -283,6 +284,7 @@ const uploadBtn = document.getElementById("uploadBtn");
 const resultBtn = document.getElementById("resultBtn");
 const darkBtn = document.getElementById("darkModeBtn");
 const toast = document.getElementById("toast");
+const bottomPill = document.querySelector(".pill");
 
 let capturedImage = null;
 
@@ -308,6 +310,9 @@ function createRipple(e, button) {
 /* Toast */
 function showToast(msg) {
     toast.textContent = msg;
+    // dynamic toast position above bottom pill
+    const pillRect = bottomPill.getBoundingClientRect();
+    toast.style.bottom = (window.innerHeight - pillRect.top + 24) + "px";
     toast.classList.add("show");
     setTimeout(()=>toast.classList.remove("show"),2000);
 }
