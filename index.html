@@ -19,7 +19,6 @@ body {
     position: relative;
     background: url("https://github.com/Navas4444/Crop-Disease-Backend/releases/download/Background-Images/crop_disease_bg.png") center / cover no-repeat;
 }
-
 .bg-overlay {
     position: fixed;
     inset: 0;
@@ -28,7 +27,6 @@ body {
     z-index: -1;
     transition: background 0.5s ease;
 }
-
 body.dark-mode .bg-overlay {
     background: rgba(0,0,0,0.5);
 }
@@ -48,14 +46,12 @@ body.dark-mode .bg-overlay {
     transform: translateY(-50px) scale(0);
     animation: pillPopup 0.5s forwards;
 }
-
 .top-pill img {
     width: 36px;
     height: 36px;
     object-fit: cover;
     border-radius: 6px;
 }
-
 .top-pill span {
     flex: 1;
     text-align: center;
@@ -63,7 +59,9 @@ body.dark-mode .bg-overlay {
     font-size: 1rem;
     color: #000;
 }
-
+.top-pill span.tech, .top-pill span.crop {
+    color: #000;
+}
 .dark-mode-btn {
     width: 36px;
     height: 36px;
@@ -72,10 +70,8 @@ body.dark-mode .bg-overlay {
     cursor: pointer;
     transition: transform 0.2s ease;
 }
-
 .dark-mode-btn:hover { transform: scale(1.1); }
 .dark-mode-btn:active { transform: scale(0.95); }
-
 .dark-mode-btn svg {
     width: 24px;
     height: 24px;
@@ -84,7 +80,6 @@ body.dark-mode .bg-overlay {
     stroke-width: 2;
     transition: stroke 0.3s ease;
 }
-
 body.dark-mode .dark-mode-btn svg { stroke: #fff; }
 
 /* Second pill */
@@ -109,13 +104,11 @@ body.dark-mode .dark-mode-btn svg { stroke: #fff; }
     animation: popupCamera 0.6s cubic-bezier(0.4,0,0.2,1) forwards;
     animation-delay: 1.2s;
 }
-
 @keyframes popupCamera {
     0% { transform: translate(-50%, -50%) scale(0); opacity:0; }
     60% { transform: translate(-50%, -50%) scale(1.1); opacity:1; }
     100% { transform: translate(-50%, -50%) scale(1); opacity:1; }
 }
-
 @keyframes pillPopup {
     0% { transform: translateY(-50px) scale(0); opacity: 0; }
     100% { transform: translateY(0) scale(1); opacity: 1; }
@@ -141,21 +134,25 @@ video, canvas {
     position: fixed;
     bottom: 24px;
     left: 50%;
-    transform: translateX(-50%) translateY(50px) scale(0);
-    display: flex;
+    display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 14px;
-    padding: 14px 20px;
+    padding: 14px 22px;
     border-radius: 999px;
     background: rgba(255,255,255,0.2);
     border: 1px solid rgba(255,255,255,0.35);
     box-shadow: 0 10px 30px rgba(0,0,0,0.3);
     opacity: 0;
-    animation: pillPopup 0.5s forwards;
+    transform: translateX(-50%) translateY(50px) scale(0);
+    animation: bottomPillPopup 0.6s forwards;
+    animation-delay: 2s;
 }
-
-.pill:nth-of-type(1) { animation-delay: 1.5s; }
-.pill:nth-of-type(2) { animation-delay: 1.7s; }
+@keyframes bottomPillPopup {
+    0% { transform: translateX(-50%) translateY(50px) scale(0); opacity:0; }
+    60% { transform: translateX(-50%) translateY(-10px) scale(1.05); opacity:1; }
+    100% { transform: translateX(-50%) translateY(0) scale(1); opacity:1; }
+}
 
 .pill button {
     all: unset;
@@ -168,10 +165,9 @@ video, canvas {
     position: relative;
     overflow: hidden;
     transition: transform 0.2s ease;
-    outline: none;                     /* remove blue focus */
-    -webkit-tap-highlight-color: transparent;  /* remove mobile highlight */
+    outline: none;                     
+    -webkit-tap-highlight-color: transparent;
 }
-
 .pill button:hover { transform: scale(1.08); }
 .pill button:active { transform: scale(0.95); }
 
@@ -199,16 +195,14 @@ video, canvas {
     background: rgba(0,120,255,0.35);
     pointer-events: none;
 }
-
-@keyframes rippleAnim {
-    to { transform: scale(4); opacity: 0; }
-}
+@keyframes rippleAnim { to { transform: scale(4); opacity: 0; } }
 
 /* ===== Toast ===== */
 .toast {
     position: fixed;
     left: 50%;
-    transform: translateX(-50%) translateY(-40px); /* moved upwards */
+    transform: translateX(-50%);
+    bottom: 120px;  /* moved toast down a bit */
     background: rgba(255,255,255,0.8);
     padding: 8px 16px;
     border-radius: 999px;
@@ -236,14 +230,14 @@ body.dark-mode .toast { background: rgba(0,0,0,0.8); color: #fff; }
 <!-- Top Pills -->
 <div class="top-pill" style="animation-delay:0.2s;">
     <img src="https://github.com/Navas4444/Crop-Disease-Backend/releases/download/Overlay-images/tech_titans_logo.png">
-    <span>Tech Titans</span>
+    <span class="tech">Tech Titans</span>
     <div class="dark-mode-btn" id="darkModeBtn">
         <svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 109.79 9.79z"/></svg>
     </div>
 </div>
 
 <div class="top-pill second-pill" style="animation-delay:0.4s;">
-    <span>Crop Disease</span>
+    <span class="crop">Crop Disease</span>
 </div>
 
 <!-- Camera -->
@@ -254,20 +248,26 @@ body.dark-mode .toast { background: rgba(0,0,0,0.8); color: #fff; }
     </div>
 </div>
 
-<!-- Controls -->
+<!-- Bottom Pill with 3 buttons -->
 <div class="pill">
-    <button id="captureBtn">
+    <button id="captureBtn" title="Capture">
         <svg class="icon" viewBox="0 0 24 24">
             <rect x="3" y="7" width="18" height="14" rx="3"/>
             <circle cx="12" cy="14" r="4"/>
         </svg>
     </button>
     <div class="divider"></div>
-    <button id="uploadBtn">
+    <button id="uploadBtn" title="Upload">
         <svg class="icon" viewBox="0 0 24 24">
             <path d="M12 16V4"/>
             <path d="M8 8l4-4 4 4"/>
             <rect x="4" y="16" width="16" height="4" rx="1"/>
+        </svg>
+    </button>
+    <div class="divider"></div>
+    <button id="resultBtn" title="Result">
+        <svg class="icon" viewBox="0 0 24 24">
+            <path d="M4 6h16M4 12h16M4 18h16"/>
         </svg>
     </button>
 </div>
@@ -280,6 +280,7 @@ const video = document.getElementById("video");
 const canvas = document.getElementById("canvas");
 const captureBtn = document.getElementById("captureBtn");
 const uploadBtn = document.getElementById("uploadBtn");
+const resultBtn = document.getElementById("resultBtn");
 const darkBtn = document.getElementById("darkModeBtn");
 const toast = document.getElementById("toast");
 
@@ -299,6 +300,7 @@ function createRipple(e, button) {
     ripple.style.width = ripple.style.height = size + "px";
     ripple.style.left = e.clientX - rect.left - size/2 + "px";
     ripple.style.top = e.clientY - rect.top - size/2 + "px";
+    ripple.style.borderRadius = window.getComputedStyle(button).borderRadius;
     button.appendChild(ripple);
     setTimeout(()=>ripple.remove(), 600);
 }
@@ -329,7 +331,13 @@ uploadBtn.onclick = async (e)=>{
         headers:{"Content-Type":"application/json"},
         body: JSON.stringify({image:capturedImage})
     });
-    showToast("Photo Uploaded ✅");
+    showToast("Photo Uploaded ✅");  // <-- Added toast for upload
+};
+
+/* Result */
+resultBtn.onclick = (e)=>{
+    createRipple(e,resultBtn);
+    showToast("Result Shown 📝");
 };
 
 /* Dark Mode */
@@ -340,4 +348,4 @@ darkBtn.onclick = ()=>{
 </script>
 
 </body>
-            </html>
+</html>
