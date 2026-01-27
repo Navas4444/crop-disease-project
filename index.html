@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Camera UI with Pills</title>
+<title>Camera UI with Toasts</title>
 <style>
 html, body {
     margin: 0;
@@ -14,7 +14,7 @@ html, body {
     overflow: hidden;
 }
 
-/* ===== Static background with 50% blur overlay ===== */
+/* ===== Background ===== */
 body {
     position: relative;
     background: url("https://github.com/Navas4444/Crop-Disease-Backend/releases/download/Background-Images/crop_disease_bg.png") center / cover no-repeat;
@@ -23,9 +23,8 @@ body {
 .bg-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(255,255,255,0.5); /* Light mode */
-    filter: blur(8px);
-    pointer-events: none;
+    background: rgba(255,255,255,0.5);
+    backdrop-filter: blur(8px);
     z-index: -1;
     transition: background 0.5s ease;
 }
@@ -41,19 +40,13 @@ body.dark-mode .bg-overlay {
     gap: 12px;
     padding: 10px 16px;
     border-radius: 999px;
-    background: rgba(255,255,255,0.5); /* semi-transparent, static blur removed */
+    background: rgba(255,255,255,0.5);
     max-width: 90%;
     margin: 16px auto 8px auto;
     box-shadow: 0 6px 18px rgba(0,0,0,0.25);
-    transition: background 0.3s ease, transform 0.2s ease;
-}
-
-body.dark-mode .top-pill:first-child {
-    background: rgba(0,0,0,0.5);
-}
-
-.top-pill:hover {
-    transform: scale(1.02);
+    opacity: 0;
+    transform: translateY(-50px) scale(0);
+    animation: pillPopup 0.5s forwards;
 }
 
 .top-pill img {
@@ -69,16 +62,6 @@ body.dark-mode .top-pill:first-child {
     font-weight: bold;
     font-size: 1rem;
     color: #000;
-    transition: color 0.3s ease;
-}
-
-/* Keep Crop Disease text color same in dark mode */
-.second-pill span {
-    color: #000 !important;
-}
-
-body.dark-mode .top-pill span:not(.second-pill span) {
-    color: #fff;
 }
 
 .dark-mode-btn {
@@ -90,13 +73,8 @@ body.dark-mode .top-pill span:not(.second-pill span) {
     transition: transform 0.2s ease;
 }
 
-.dark-mode-btn:hover {
-    transform: scale(1.1);
-}
-
-.dark-mode-btn:active {
-    transform: scale(0.95);
-}
+.dark-mode-btn:hover { transform: scale(1.1); }
+.dark-mode-btn:active { transform: scale(0.95); }
 
 .dark-mode-btn svg {
     width: 24px;
@@ -107,9 +85,7 @@ body.dark-mode .top-pill span:not(.second-pill span) {
     transition: stroke 0.3s ease;
 }
 
-body.dark-mode .dark-mode-btn svg {
-    stroke: #fff;
-}
+body.dark-mode .dark-mode-btn svg { stroke: #fff; }
 
 /* Second pill */
 .second-pill {
@@ -117,7 +93,7 @@ body.dark-mode .dark-mode-btn svg {
     background: rgba(255,255,255,0.5);
 }
 
-/* ===== Camera container with popup animation ===== */
+/* ===== Camera container ===== */
 .camera-shell {
     position: absolute;
     top: 50%;
@@ -129,7 +105,9 @@ body.dark-mode .dark-mode-btn svg {
     padding: 12px;
     background: rgba(255,255,255,0.18);
     box-shadow: 0 25px 60px rgba(0,0,0,0.35);
+    opacity: 0;
     animation: popupCamera 0.6s cubic-bezier(0.4,0,0.2,1) forwards;
+    animation-delay: 1.2s;
 }
 
 @keyframes popupCamera {
@@ -138,7 +116,11 @@ body.dark-mode .dark-mode-btn svg {
     100% { transform: translate(-50%, -50%) scale(1); opacity:1; }
 }
 
-/* Inner camera */
+@keyframes pillPopup {
+    0% { transform: translateY(-50px) scale(0); opacity: 0; }
+    100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+
 .camera-inner {
     width: 100%;
     height: 100%;
@@ -154,12 +136,12 @@ video, canvas {
     object-fit: cover;
 }
 
-/* ===== Bottom glass pill (no real-time blur) ===== */
+/* ===== Bottom pill ===== */
 .pill {
     position: fixed;
     bottom: 24px;
     left: 50%;
-    transform: translateX(-50%);
+    transform: translateX(-50%) translateY(50px) scale(0);
     display: flex;
     align-items: center;
     gap: 14px;
@@ -168,9 +150,13 @@ video, canvas {
     background: rgba(255,255,255,0.2);
     border: 1px solid rgba(255,255,255,0.35);
     box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    opacity: 0;
+    animation: pillPopup 0.5s forwards;
 }
 
-/* Buttons */
+.pill:nth-of-type(1) { animation-delay: 1.5s; }
+.pill:nth-of-type(2) { animation-delay: 1.7s; }
+
 .pill button {
     all: unset;
     cursor: pointer;
@@ -181,26 +167,18 @@ video, canvas {
     place-items: center;
     position: relative;
     overflow: hidden;
-    transition: transform 0.2s ease, background 0.2s ease;
+    transition: transform 0.2s ease;
 }
 
-.pill button:hover {
-    transform: scale(1.08);
-    background: rgba(255,255,255,0.25);
-}
+.pill button:hover { transform: scale(1.08); }
+.pill button:active { transform: scale(0.95); }
 
-.pill button:active {
-    transform: scale(0.92);
-}
-
-/* Divider */
 .divider {
     width: 1px;
     height: 22px;
     background: rgba(255,255,255,0.5);
 }
 
-/* Outline icons */
 .icon {
     width: 22px;
     height: 22px;
@@ -210,38 +188,60 @@ video, canvas {
     opacity: 0.9;
 }
 
-/* Ripple effect */
+/* ===== Adaptive ripple ===== */
 .ripple {
     position: absolute;
     border-radius: 50%;
     transform: scale(0);
-    animation: rippleAnim 600ms ease-out;
-    background: rgba(255,255,255,0.45);
+    animation: rippleAnim 0.6s ease-out;
+    background: rgba(0,120,255,0.35);
     pointer-events: none;
 }
 
 @keyframes rippleAnim {
     to { transform: scale(4); opacity: 0; }
 }
+
+/* ===== Toast ===== */
+.toast {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 100px;
+    background: rgba(255,255,255,0.8);
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-weight: bold;
+    color: #000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    z-index: 10;
+    max-width: 60%;
+    text-align: center;
+}
+.toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+body.dark-mode .toast { background: rgba(0,0,0,0.8); color: #fff; }
+
 </style>
 </head>
 <body>
 
-<!-- Background overlay -->
 <div class="bg-overlay"></div>
 
 <!-- Top Pills -->
-<div class="top-pill">
-    <img src="https://github.com/Navas4444/Crop-Disease-Backend/releases/download/Overlay-images/tech_titans_logo.png" alt="Logo">
+<div class="top-pill" style="animation-delay:0.2s;">
+    <img src="https://github.com/Navas4444/Crop-Disease-Backend/releases/download/Overlay-images/tech_titans_logo.png">
     <span>Tech Titans</span>
-    <div class="dark-mode-btn" id="darkModeBtn" title="Toggle Dark Mode">
-        <svg viewBox="0 0 24 24">
-            <path d="M21 12.79A9 9 0 1111.21 3a7 7 0 109.79 9.79z"/>
-        </svg>
+    <div class="dark-mode-btn" id="darkModeBtn">
+        <svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 109.79 9.79z"/></svg>
     </div>
 </div>
 
-<div class="top-pill second-pill">
+<div class="top-pill second-pill" style="animation-delay:0.4s;">
     <span>Crop Disease</span>
 </div>
 
@@ -255,14 +255,14 @@ video, canvas {
 
 <!-- Controls -->
 <div class="pill">
-    <button id="captureBtn" title="Capture">
+    <button id="captureBtn">
         <svg class="icon" viewBox="0 0 24 24">
             <rect x="3" y="7" width="18" height="14" rx="3"/>
             <circle cx="12" cy="14" r="4"/>
         </svg>
     </button>
     <div class="divider"></div>
-    <button id="uploadBtn" title="Upload">
+    <button id="uploadBtn">
         <svg class="icon" viewBox="0 0 24 24">
             <path d="M12 16V4"/>
             <path d="M8 8l4-4 4 4"/>
@@ -271,57 +271,72 @@ video, canvas {
     </button>
 </div>
 
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
 <script>
 const video = document.getElementById("video");
 const canvas = document.getElementById("canvas");
 const captureBtn = document.getElementById("captureBtn");
 const uploadBtn = document.getElementById("uploadBtn");
 const darkBtn = document.getElementById("darkModeBtn");
+const toast = document.getElementById("toast");
+
 let capturedImage = null;
 
-/* Start camera */
+/* Camera */
 navigator.mediaDevices.getUserMedia({ video: true })
 .then(stream => video.srcObject = stream)
-.catch(err => alert("Camera error"));
+.catch(() => showToast("Camera error"));
 
-/* Ripple effect */
-function createRipple(event, button) {
+/* Adaptive Ripple */
+function createRipple(e, button) {
     const ripple = document.createElement("span");
     ripple.classList.add("ripple");
     const rect = button.getBoundingClientRect();
     const size = Math.max(rect.width, rect.height);
     ripple.style.width = ripple.style.height = size + "px";
-    ripple.style.left = event.clientX - rect.left - size / 2 + "px";
-    ripple.style.top = event.clientY - rect.top - size / 2 + "px";
+    ripple.style.left = e.clientX - rect.left - size/2 + "px";
+    ripple.style.top = e.clientY - rect.top - size/2 + "px";
     button.appendChild(ripple);
-    setTimeout(() => ripple.remove(), 600);
+    setTimeout(()=>ripple.remove(), 600);
+}
+
+/* Toast */
+function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add("show");
+    setTimeout(()=>toast.classList.remove("show"),2000);
 }
 
 /* Capture */
-captureBtn.onclick = (e) => {
-    createRipple(e, captureBtn);
+captureBtn.onclick = (e)=>{
+    createRipple(e,captureBtn);
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
-    canvas.getContext("2d").drawImage(video, 0, 0);
+    canvas.getContext("2d").drawImage(video,0,0);
     capturedImage = canvas.toDataURL("image/jpeg");
+    showToast("Photo Captured 📸");
 };
 
-/* Upload (desktop Flask) */
-uploadBtn.onclick = async () => {
-    if (!capturedImage) { alert("Capture image first"); return; }
-    await fetch("http://127.0.0.1:5000/upload", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ image: capturedImage })
+/* Upload */
+uploadBtn.onclick = async ()=>{
+    createRipple(event,uploadBtn);
+    if(!capturedImage){ showToast("Capture photo first"); return;}
+    await fetch("http://127.0.0.1:5000/upload",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({image:capturedImage})
     });
-    alert("Image saved to laptop ✅");
+    showToast("Photo Uploaded ✅");
 };
 
-/* Dark mode toggle */
-darkBtn.addEventListener('click', () => {
-    document.body.classList.toggle('dark-mode');
-});
+/* Dark Mode */
+darkBtn.onclick = ()=>{
+    document.body.classList.toggle("dark-mode");
+    showToast(document.body.classList.contains("dark-mode") ? "Dark Mode 🌙":"Light Mode ☀️");
+};
 </script>
 
 </body>
-</html>
+    </html>
