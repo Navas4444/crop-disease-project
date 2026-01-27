@@ -14,23 +14,22 @@ html, body {
     overflow: hidden;
 }
 
-/* ===== Backgrounds ===== */
+/* ===== Static background with 50% blur overlay ===== */
 body {
     position: relative;
     background: url("https://github.com/Navas4444/Crop-Disease-Backend/releases/download/Background-Images/crop_disease_bg.png") center / cover no-repeat;
 }
 
-/* Semi-transparent overlays for background only */
 .bg-overlay {
     position: fixed;
     inset: 0;
+    background: rgba(255,255,255,0.5); /* Light mode */
+    filter: blur(8px);
     pointer-events: none;
-    transition: background 0.5s ease;
     z-index: -1;
-    background: rgba(255,255,255,0.5); /* Light mode default */
+    transition: background 0.5s ease;
 }
 
-/* Dark mode applied */
 body.dark-mode .bg-overlay {
     background: rgba(0,0,0,0.5);
 }
@@ -42,8 +41,7 @@ body.dark-mode .bg-overlay {
     gap: 12px;
     padding: 10px 16px;
     border-radius: 999px;
-    background: rgba(255,255,255,0.5);
-    backdrop-filter: blur(8px);
+    background: rgba(255,255,255,0.5); /* semi-transparent, static blur removed */
     max-width: 90%;
     margin: 16px auto 8px auto;
     box-shadow: 0 6px 18px rgba(0,0,0,0.25);
@@ -54,12 +52,10 @@ body.dark-mode .top-pill:first-child {
     background: rgba(0,0,0,0.5);
 }
 
-/* Hover effect */
 .top-pill:hover {
     transform: scale(1.02);
 }
 
-/* Logo image */
 .top-pill img {
     width: 36px;
     height: 36px;
@@ -67,7 +63,6 @@ body.dark-mode .top-pill:first-child {
     border-radius: 6px;
 }
 
-/* Center text */
 .top-pill span {
     flex: 1;
     text-align: center;
@@ -77,11 +72,15 @@ body.dark-mode .top-pill:first-child {
     transition: color 0.3s ease;
 }
 
-body.dark-mode .top-pill span {
+/* Keep Crop Disease text color same in dark mode */
+.second-pill span {
+    color: #000 !important;
+}
+
+body.dark-mode .top-pill span:not(.second-pill span) {
     color: #fff;
 }
 
-/* Dark mode button */
 .dark-mode-btn {
     width: 36px;
     height: 36px;
@@ -99,7 +98,6 @@ body.dark-mode .top-pill span {
     transform: scale(0.95);
 }
 
-/* Classic moon icon for dark mode */
 .dark-mode-btn svg {
     width: 24px;
     height: 24px;
@@ -119,26 +117,28 @@ body.dark-mode .dark-mode-btn svg {
     background: rgba(255,255,255,0.5);
 }
 
-body.dark-mode .second-pill {
-    background: rgba(0,0,0,0.5);
-}
-
-/* ===== Camera outer shell ===== */
+/* ===== Camera container with popup animation ===== */
 .camera-shell {
     position: absolute;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%) scale(0);
     width: 280px;
     height: 380px;
     border-radius: 44px;
     padding: 12px;
     background: rgba(255,255,255,0.18);
-    backdrop-filter: blur(14px);
     box-shadow: 0 25px 60px rgba(0,0,0,0.35);
+    animation: popupCamera 0.6s cubic-bezier(0.4,0,0.2,1) forwards;
 }
 
-/* ===== Inner white curved container ===== */
+@keyframes popupCamera {
+    0% { transform: translate(-50%, -50%) scale(0); opacity:0; }
+    60% { transform: translate(-50%, -50%) scale(1.1); opacity:1; }
+    100% { transform: translate(-50%, -50%) scale(1); opacity:1; }
+}
+
+/* Inner camera */
 .camera-inner {
     width: 100%;
     height: 100%;
@@ -154,7 +154,7 @@ video, canvas {
     object-fit: cover;
 }
 
-/* ===== Bottom glass pill ===== */
+/* ===== Bottom glass pill (no real-time blur) ===== */
 .pill {
     position: fixed;
     bottom: 24px;
@@ -165,7 +165,6 @@ video, canvas {
     gap: 14px;
     padding: 14px 20px;
     border-radius: 999px;
-    backdrop-filter: blur(16px);
     background: rgba(255,255,255,0.2);
     border: 1px solid rgba(255,255,255,0.35);
     box-shadow: 0 10px 30px rgba(0,0,0,0.3);
@@ -211,7 +210,7 @@ video, canvas {
     opacity: 0.9;
 }
 
-/* ===== Ripple effect ===== */
+/* Ripple effect */
 .ripple {
     position: absolute;
     border-radius: 50%;
@@ -222,10 +221,7 @@ video, canvas {
 }
 
 @keyframes rippleAnim {
-    to {
-        transform: scale(4);
-        opacity: 0;
-    }
+    to { transform: scale(4); opacity: 0; }
 }
 </style>
 </head>
@@ -288,7 +284,7 @@ navigator.mediaDevices.getUserMedia({ video: true })
 .then(stream => video.srcObject = stream)
 .catch(err => alert("Camera error"));
 
-/* Ripple creator */
+/* Ripple effect */
 function createRipple(event, button) {
     const ripple = document.createElement("span");
     ripple.classList.add("ripple");
