@@ -103,11 +103,10 @@ function isMobile() {
 
 async function startCamera() {
     try {
-        // Explicitly request front camera if available
-        const constraints = {
-            video: isMobile() ? { facingMode: "user" } : { facingMode: "user" },
-            audio: false
-        };
+        const constraints = isMobile()
+            ? { video: { facingMode: "user" }, audio: false } // mobile front camera
+            : { video: true, audio: false };                 // desktop: any webcam
+
         const stream = await navigator.mediaDevices.getUserMedia(constraints);
         video.srcObject = stream;
         video.play();
@@ -117,12 +116,12 @@ async function startCamera() {
     }
 }
 
-// Start camera immediately on page load
+// Auto start camera on page load
 window.addEventListener("load", () => {
     startCamera();
 });
 
-// Start button as fallback
+// Button fallback
 startBtn.addEventListener("click", startCamera);
 </script>
 
