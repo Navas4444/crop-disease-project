@@ -34,37 +34,45 @@ body::after {
     z-index: -2;
 }
 
-/* ===== STARTUP RIPPLE ===== */
-.startup-ripple {
+/* ===== REAL WATER RIPPLE ===== */
+.water-ripple {
     position: fixed;
     inset: 0;
     display: grid;
     place-items: center;
     pointer-events: none;
     z-index: 5;
+    animation: fadeOut 1.8s ease forwards;
 }
 
-.startup-ripple span {
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.35);
+.water-ripple svg {
+    width: 40px;
+    height: 40px;
+    filter: url(#liquid);
+    animation: expandWave 1.8s cubic-bezier(.18,.8,.3,1) forwards;
+}
+
+.water-ripple circle {
+    fill: rgba(255,255,255,0.35);
     backdrop-filter: blur(20px);
-    animation: startupWave 1.6s cubic-bezier(.2,.6,.2,1) forwards;
 }
 
-@keyframes startupWave {
+@keyframes expandWave {
     0% {
-        transform: scale(0);
+        transform: scale(0.4);
         opacity: 1;
     }
-    70% {
-        opacity: 0.6;
+    60% {
+        opacity: 0.8;
     }
     100% {
-        transform: scale(80);
+        transform: scale(45);
         opacity: 0;
     }
+}
+
+@keyframes fadeOut {
+    to { opacity: 0; }
 }
 
 /* ===== Camera outer shell ===== */
@@ -155,7 +163,7 @@ video, canvas {
     opacity: 0.9;
 }
 
-/* ===== Button ripple ===== */
+/* ===== Button click ripple ===== */
 .ripple {
     position: absolute;
     border-radius: 50%;
@@ -176,9 +184,31 @@ video, canvas {
 
 <body>
 
-<!-- STARTUP RIPPLE -->
-<div class="startup-ripple" id="startupRipple">
-    <span></span>
+<!-- REAL WATER RIPPLE -->
+<div class="water-ripple">
+  <svg viewBox="0 0 200 200">
+    <defs>
+      <filter id="liquid">
+        <feTurbulence type="turbulence"
+          baseFrequency="0.015"
+          numOctaves="3"
+          seed="8">
+          <animate attributeName="baseFrequency"
+            dur="1.8s"
+            values="0.03;0.01"
+            fill="freeze"/>
+        </feTurbulence>
+        <feDisplacementMap in="SourceGraphic"
+          scale="55">
+          <animate attributeName="scale"
+            dur="1.8s"
+            values="55;0"
+            fill="freeze"/>
+        </feDisplacementMap>
+      </filter>
+    </defs>
+    <circle cx="100" cy="100" r="5"/>
+  </svg>
 </div>
 
 <!-- Camera -->
@@ -214,19 +244,16 @@ const video = document.getElementById("video");
 const canvas = document.getElementById("canvas");
 const captureBtn = document.getElementById("captureBtn");
 const uploadBtn = document.getElementById("uploadBtn");
-const startupRipple = document.getElementById("startupRipple");
 
-let capturedImage = null;
-
-/* Remove startup ripple after animation */
-setTimeout(() => startupRipple.remove(), 1700);
+/* Remove water ripple after animation */
+setTimeout(() => document.querySelector(".water-ripple")?.remove(), 1800);
 
 /* Start camera */
 navigator.mediaDevices.getUserMedia({ video: true })
 .then(stream => video.srcObject = stream)
 .catch(() => alert("Camera error"));
 
-/* Button ripple */
+/* Button click ripple */
 function createRipple(event, button) {
     const ripple = document.createElement("span");
     ripple.classList.add("ripple");
@@ -235,14 +262,15 @@ function createRipple(event, button) {
     const size = Math.max(rect.width, rect.height);
 
     ripple.style.width = ripple.style.height = size + "px";
-    ripple.style.left = event.clientX - rect.left - size / 2 + "px";
-    ripple.style.top = event.clientY - rect.top - size / 2 + "px";
+    ripple.style.left = event.clientX - rect.left - size/2 + "px";
+    ripple.style.top = event.clientY - rect.top - size/2 + "px";
 
     button.appendChild(ripple);
     setTimeout(() => ripple.remove(), 600);
 }
 
-/* Capture */
+/* Capture image */
+let capturedImage = null;
 captureBtn.onclick = (e) => {
     createRipple(e, captureBtn);
 
@@ -253,7 +281,7 @@ captureBtn.onclick = (e) => {
     capturedImage = canvas.toDataURL("image/jpeg");
 };
 
-/* Upload (desktop Flask) */
+/* Upload image to Flask server */
 uploadBtn.onclick = async () => {
     if (!capturedImage) return alert("Capture image first");
 
