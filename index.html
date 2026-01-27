@@ -60,7 +60,7 @@ body.dark-mode .bg-overlay {
     color: #000;
 }
 .top-pill span.tech, .top-pill span.crop {
-    color: #000; /* keep color same in dark mode */
+    color: #000;
 }
 .dark-mode-btn {
     width: 36px;
@@ -134,9 +134,9 @@ video, canvas {
     position: fixed;
     bottom: 24px;
     left: 50%;
-    transform: translateX(-50%) translateY(50px) scale(0);
-    display: flex;
+    display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 14px;
     padding: 14px 22px;
     border-radius: 999px;
@@ -144,9 +144,15 @@ video, canvas {
     border: 1px solid rgba(255,255,255,0.35);
     box-shadow: 0 10px 30px rgba(0,0,0,0.3);
     opacity: 0;
-    animation: pillPopup 0.5s forwards;
+    transform: translateX(-50%) translateY(50px) scale(0);
+    animation: bottomPillPopup 0.6s forwards;
+    animation-delay: 2s;
 }
-.pill:nth-of-type(1) { animation-delay: 1.5s; }
+@keyframes bottomPillPopup {
+    0% { transform: translateX(-50%) translateY(50px) scale(0); opacity:0; }
+    60% { transform: translateX(-50%) translateY(-10px) scale(1.05); opacity:1; }
+    100% { transform: translateX(-50%) translateY(0) scale(1); opacity:1; }
+}
 
 .pill button {
     all: unset;
@@ -194,7 +200,7 @@ video, canvas {
     position: fixed;
     left: 50%;
     transform: translateX(-50%);
-    bottom: 150px;
+    bottom: 170px;
     background: rgba(255,255,255,0.8);
     padding: 8px 16px;
     border-radius: 999px;
