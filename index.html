@@ -166,7 +166,7 @@ video, canvas {
     overflow: hidden;
     transition: transform 0.2s ease;
     outline: none;                     
-    -webkit-tap-highlight-color: transparent;
+    -webkit-tap-highlight-color: transparent; /* fixed blue highlight */
 }
 .pill button:hover { transform: scale(1.08); }
 .pill button:active { transform: scale(0.95); }
@@ -202,7 +202,7 @@ video, canvas {
     position: fixed;
     left: 50%;
     transform: translateX(-50%);
-    bottom: 120px;  /* moved toast down a bit */
+    bottom: 180px;  /* moved toast further down */
     background: rgba(255,255,255,0.8);
     padding: 8px 16px;
     border-radius: 999px;
@@ -331,7 +331,7 @@ uploadBtn.onclick = async (e)=>{
         headers:{"Content-Type":"application/json"},
         body: JSON.stringify({image:capturedImage})
     });
-    showToast("Photo Uploaded ✅");  // <-- Added toast for upload
+    showToast("Photo Uploaded ✅");
 };
 
 /* Result */
