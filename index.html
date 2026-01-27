@@ -5,36 +5,77 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Camera UI</title>
 <style>
-html, body {margin:0; padding:0; width:100%; height:100%; background:#000; overflow:hidden;}
+html, body {margin:0; padding:0; width:100%; height:100%; overflow:hidden;}
 body {
     background: url("https://github.com/Navas4444/Crop-Disease-Backend/releases/download/Background-Images/crop_disease_bg.png") center / cover no-repeat fixed;
 }
+
+/* ===== Curved camera container ===== */
 .camera-shell {
-    position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
-    width:260px; height:360px; border-radius:40px; overflow:hidden;
-    background: rgba(0,0,0,0.25); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-    border:1px solid rgba(255,255,255,0.25); box-shadow:0 15px 40px rgba(0,0,0,0.4);
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%, -50%);
+    width:260px;
+    height:360px;
+    border-radius:40px;
+    overflow:hidden;
+    background: rgba(0,0,0,0.25);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border:1px solid rgba(255,255,255,0.25);
+    box-shadow:0 15px 40px rgba(0,0,0,0.4);
 }
-video {width:100%; height:100%; object-fit:cover; transform: scaleX(-1);}
+video {
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    transform: scaleX(-1); /* mirror selfie */
+}
+
+/* ===== Bottom pill ===== */
 .pill {
-    position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
-    display:flex; align-items:center; padding:12px 18px; border-radius:999px;
-    backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
-    background: rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.25);
-    box-shadow:0 8px 25px rgba(0,0,0,0.25); z-index:10;
+    position:fixed;
+    bottom:24px;
+    left:50%;
+    transform:translateX(-50%);
+    display:flex;
+    align-items:center;
+    padding:12px 18px;
+    border-radius:999px;
+    backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
+    background: rgba(255,255,255,0.15);
+    border:1px solid rgba(255,255,255,0.25);
+    box-shadow:0 8px 25px rgba(0,0,0,0.25);
+    z-index:10;
 }
-.pill button {all:unset; cursor:pointer; padding:0 10px; display:flex; align-items:center; justify-content:center;}
-.pill svg {width:22px; height:22px; stroke:white; opacity:0.9;}
+.pill button {
+    all:unset;
+    cursor:pointer;
+    padding:0 10px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+.pill svg {
+    width:22px;
+    height:22px;
+    stroke:white;
+    opacity:0.9;
+}
 .pill button:active svg {opacity:0.6;}
 .divider {width:1px; height:20px; background:rgba(255,255,255,0.45);}
 </style>
 </head>
 <body>
 
+<!-- ===== Curved camera container ===== -->
 <div class="camera-shell">
     <video id="camera" autoplay playsinline muted></video>
 </div>
 
+<!-- ===== Bottom pill ===== -->
 <div class="pill">
     <button id="startCamera" title="Live Camera">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
@@ -62,24 +103,27 @@ function isMobile() {
 
 async function startCamera() {
     try {
-        const constraints = isMobile()
-            ? { video: { facingMode: "user" }, audio: false }  // front camera mobile
-            : { video: true, audio: false };                   // webcam desktop
-
+        // Explicitly request front camera if available
+        const constraints = {
+            video: isMobile() ? { facingMode: "user" } : { facingMode: "user" },
+            audio: false
+        };
         const stream = await navigator.mediaDevices.getUserMedia(constraints);
         video.srcObject = stream;
+        video.play();
     } catch (err) {
         console.error("Camera access error:", err);
-        alert("Camera access blocked. Open this page on HTTPS or localhost.");
+        alert("Camera access blocked. Make sure to allow camera in browser.");
     }
 }
 
-startBtn.addEventListener("click", startCamera);
-
-// auto start only if running on localhost
-if(location.hostname === "localhost") {
+// Start camera immediately on page load
+window.addEventListener("load", () => {
     startCamera();
-}
+});
+
+// Start button as fallback
+startBtn.addEventListener("click", startCamera);
 </script>
 
 </body>
