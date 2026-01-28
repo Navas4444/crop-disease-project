@@ -337,8 +337,14 @@ let capturedImage = null;
 
 /* Camera */
 navigator.mediaDevices.getUserMedia({ video: true })
-.then(stream => video.srcObject = stream)
-.catch(() => showToast("Camera error"));
+.then(stream => {
+    video.srcObject = stream;
+})
+.catch(err => {
+    console.error(err);
+    showToast("Camera error ❌");
+});
+
 
 /* Adaptive Ripple */
 function createRipple(e, button) {
@@ -431,4 +437,5 @@ darkBtn.onclick = ()=>{
 
 </body>
 </html>
+
 
