@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Camera UI with AI Result</title>
+<title>Crop Disease Detector</title>
 <style>
 html, body {
     margin: 0;
@@ -59,6 +59,9 @@ body.dark-mode .bg-overlay {
     font-size: 1rem;
     color: #000;
 }
+.top-pill span.tech, .top-pill span.crop {
+    color: #000;
+}
 .dark-mode-btn {
     width: 36px;
     height: 36px;
@@ -79,6 +82,7 @@ body.dark-mode .bg-overlay {
 }
 body.dark-mode .dark-mode-btn svg { stroke: #fff; }
 
+/* Second pill */
 .second-pill {
     justify-content: center;
     background: rgba(255,255,255,0.5);
@@ -198,7 +202,7 @@ video, canvas {
     position: fixed;
     left: 50%;
     transform: translateX(-50%);
-    bottom: 180px;
+    bottom: 180px;  /* moved toast further down */
     background: rgba(255,255,255,0.8);
     padding: 8px 16px;
     border-radius: 999px;
@@ -217,35 +221,37 @@ video, canvas {
 }
 body.dark-mode .toast { background: rgba(0,0,0,0.8); color: #fff; }
 
-/* ===== AI RESULT POPUP ===== */
+/* ===== RESULT POPUP ===== */
 #resultOverlay {
     position: fixed;
     inset: 0;
+    background: rgba(255,255,255,0.5);
+    backdrop-filter: blur(8px);
     display: none;
     align-items: center;
     justify-content: center;
-    backdrop-filter: blur(8px); /* real-time blur behind popup */
-    z-index: 9999;
+    z-index: 1000;
 }
-
 #resultBox {
-    background: rgba(255,255,255,0.5); /* 50% semi-transparent */
-    border-radius: 20px;
+    background: rgba(255,255,255,0.5);
     padding: 20px;
+    border-radius: 22px;
     width: 80%;
-    max-width: 320px;
+    max-width: 350px;
     text-align: center;
     color: #000;
+    font-weight: bold;
 }
-
 #closePopup {
     margin-top: 15px;
     background: #ff7675;
+    color: #fff;
+    padding: 10px 14px;
     border: none;
-    border-radius: 12px;
-    padding: 8px 12px;
+    border-radius: 10px;
     cursor: pointer;
 }
+#closePopup:hover { opacity: 0.85; }
 
 </style>
 </head>
@@ -274,7 +280,7 @@ body.dark-mode .toast { background: rgba(0,0,0,0.8); color: #fff; }
     </div>
 </div>
 
-<!-- Bottom Pill with buttons -->
+<!-- Bottom Pill with 3 buttons -->
 <div class="pill">
     <button id="captureBtn" title="Capture">
         <svg class="icon" viewBox="0 0 24 24">
@@ -301,12 +307,12 @@ body.dark-mode .toast { background: rgba(0,0,0,0.8); color: #fff; }
 <!-- Toast -->
 <div class="toast" id="toast"></div>
 
-<!-- AI RESULT POPUP -->
+<!-- Result Popup -->
 <div id="resultOverlay">
     <div id="resultBox">
-        <h3>AI Result</h3>
+        <h3>Detection Result</h3>
         <p id="popupResult">Loading...</p>
-        <button id="closePopup">✖ Close</button>
+        <button id="closePopup">Close</button>
     </div>
 </div>
 
@@ -324,12 +330,12 @@ const closePopup = document.getElementById("closePopup");
 
 let capturedImage = null;
 
-/* Camera */
+/* ---------- CAMERA ---------- */
 navigator.mediaDevices.getUserMedia({ video: true })
 .then(stream => video.srcObject = stream)
-.catch(() => showToast("Camera error"));
+.catch(err => showToast("Camera blocked ❌"));
 
-/* Adaptive Ripple */
+/* ---------- Adaptive Ripple ---------- */
 function createRipple(e, button) {
     const ripple = document.createElement("span");
     ripple.classList.add("ripple");
@@ -343,15 +349,15 @@ function createRipple(e, button) {
     setTimeout(()=>ripple.remove(), 600);
 }
 
-/* Toast */
+/* ---------- TOAST ---------- */
 function showToast(msg) {
-    toast.textContent = msg;
-    toast.classList.add("show");
-    setTimeout(()=>toast.classList.remove("show"),2000);
+    toast.innerText = msg;
+    toast.style.display = "block";
+    setTimeout(() => toast.style.display = "none", 2000);
 }
 
-/* Capture */
-captureBtn.onclick = (e)=>{
+/* ---------- CAPTURE ---------- */
+captureBtn.onclick = (e) => {
     createRipple(e,captureBtn);
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
@@ -360,8 +366,8 @@ captureBtn.onclick = (e)=>{
     showToast("Photo Captured 📸");
 };
 
-/* Upload */
-uploadBtn.onclick = async (e)=>{
+/* ---------- UPLOAD ---------- */
+uploadBtn.onclick = async (e) => {
     createRipple(e,uploadBtn);
     if(!capturedImage){ showToast("Capture photo first"); return;}
     await fetch("http://127.0.0.1:5000/upload",{
@@ -372,33 +378,36 @@ uploadBtn.onclick = async (e)=>{
     showToast("Photo Uploaded ✅");
 };
 
-/* Result (AI Prediction) */
-resultBtn.onclick = async (e)=>{
+/* ---------- RESULT POPUP ---------- */
+resultBtn.onclick = async (e) => {
     createRipple(e,resultBtn);
     if(!capturedImage){ showToast("Capture photo first"); return;}
-
     overlay.style.display = "flex";
     popupResult.innerText = "Analyzing image… 🌱";
 
     try {
-        const res = await fetch("http://127.0.0.1:5000/predict", {
-            method: "POST",
+        const res = await fetch("http://127.0.0.1:5000/predict",{
+            method:"POST",
             headers: {"Content-Type":"application/json"},
             body: JSON.stringify({image: capturedImage})
         });
         const data = await res.json();
-        popupResult.innerText = `Disease: ${data.disease}\nConfidence: ${data.confidence}%`;
+        if(data.disease === "Not a plant") {
+            popupResult.innerText = "Please show crops or plants 🌿";
+        } else {
+            popupResult.innerText = "Disease: " + data.disease + "\nConfidence: " + data.confidence + "%";
+        }
     } catch(err){
         console.error(err);
         popupResult.innerText = "Server error ❌";
     }
 };
 
-/* Close Popup */
-closePopup.onclick = () => { overlay.style.display = "none"; };
+/* ---------- CLOSE POPUP ---------- */
+closePopup.onclick = () => overlay.style.display = "none";
 
-/* Dark Mode */
-darkBtn.onclick = ()=>{
+/* ---------- DARK MODE ---------- */
+darkBtn.onclick = () => {
     document.body.classList.toggle("dark-mode");
     showToast(document.body.classList.contains("dark-mode") ? "Dark Mode 🌙":"Light Mode ☀️");
 };
