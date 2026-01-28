@@ -370,11 +370,12 @@ captureBtn.onclick = (e) => {
 uploadBtn.onclick = async (e) => {
     createRipple(e,uploadBtn);
     if(!capturedImage){ showToast("Capture photo first"); return;}
-    await fetch("http://127.0.0.1:5000/upload",{
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body: JSON.stringify({image:capturedImage})
-    });
+    const res = await fetch("https://crop-disease-api.onrender.com/predict", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ image: capturedImage })
+});
+
     showToast("Photo Uploaded ✅");
 };
 
@@ -415,3 +416,4 @@ darkBtn.onclick = () => {
 
 </body>
 </html>
+
