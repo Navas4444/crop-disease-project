@@ -222,9 +222,56 @@ video, canvas {
 }
 body.dark-mode .toast { background: rgba(0,0,0,0.8); color: #fff; }
 
+
+    /* ===== Result Popup ===== */
+#resultOverlay {
+    position: fixed;
+    inset: 0;
+    backdrop-filter: blur(14px);
+    background: rgba(0,0,0,0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+}
+
+#resultPopup {
+    width: 85%;
+    max-width: 340px;
+    background: rgba(255,255,255,0.5);
+    border-radius: 22px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.35);
+    animation: popupScale 0.3s ease;
+}
+
+#popupClose {
+    position: absolute;
+    right: 16px;
+    top: 12px;
+    font-size: 22px;
+    cursor: pointer;
+}
+
+@keyframes popupScale {
+    from { transform: scale(0.85); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
+}
+
 </style>
 </head>
 <body>
+
+    <!-- ===== Result Popup (ADDED) ===== -->
+<div id="resultOverlay" style="display:none;">
+  <div id="resultPopup">
+    <span id="popupClose">×</span>
+    <h3>Detection Result</h3>
+    <p id="popupResult">Analyzing…</p>
+  </div>
+</div>
+
 
 <div class="bg-overlay"></div>
 
@@ -340,9 +387,31 @@ uploadBtn.onclick = async (e)=>{
 };
 
 /* Result */
-resultBtn.onclick = (e)=>{
-    createRipple(e,resultBtn);
-    showToast("Result Shown 📝");
+resultBtn.onclick = async (e)=>{
+    createRipple(e, resultBtn);
+
+    const overlay = document.getElementById("resultOverlay");
+    const resultText = document.getElementById("popupResult");
+
+    overlay.style.display = "flex";
+    resultText.innerText = "Analyzing image… 🌿";
+
+    try {
+        const res = await fetch("http://127.0.0.1:5000/predict");
+        const data = await res.json();
+
+        if (data.error) {
+            resultText.innerText = "❌ " + data.error;
+        } else {
+            resultText.innerText =
+                "Disease: " + data.disease +
+                "\nConfidence: " + data.confidence + "%";
+        }
+    } catch (err) {
+        resultText.innerText = "⚠️ Server error";
+    }
+};
+
 };
 
 /* Dark Mode */
@@ -350,7 +419,16 @@ darkBtn.onclick = ()=>{
     document.body.classList.toggle("dark-mode");
     showToast(document.body.classList.contains("dark-mode") ? "Dark Mode 🌙":"Light Mode ☀️");
 };
+    document.getElementById("popupClose").onclick = ()=>{
+    document.getElementById("resultOverlay").style.display = "none";
+
+    fetch("http://127.0.0.1:5000/delete-image", {
+        method: "POST"
+    });
+};
+
 </script>
 
 </body>
 </html>
+
