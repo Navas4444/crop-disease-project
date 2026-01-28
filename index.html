@@ -3,255 +3,52 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Crop Disease Detector</title>
+<title>Crop Disease Detection</title>
 <style>
-html, body {
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    height: 100%;
-    font-family: Arial, sans-serif;
-    overflow: hidden;
-}
-
-/* ===== Background ===== */
-body {
-    position: relative;
-    background: url("https://github.com/Navas4444/Crop-Disease-Backend/releases/download/Background-Images/crop_disease_bg.png") center / cover no-repeat;
-}
-.bg-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(255,255,255,0.5);
-    backdrop-filter: blur(8px);
-    z-index: -1;
-    transition: background 0.5s ease;
-}
-body.dark-mode .bg-overlay {
-    background: rgba(0,0,0,0.5);
-}
+/* ===================== Base Styles ===================== */
+* { box-sizing: border-box; font-family: Arial, sans-serif; }
+body, html { margin:0; padding:0; width:100%; height:100%; overflow:hidden; background: url("https://github.com/Navas4444/Crop-Disease-Backend/releases/download/Background-Images/crop_disease_bg.png") center / cover no-repeat; color:white; }
+.bg-overlay { position: fixed; inset:0; background: rgba(255,255,255,0.5); backdrop-filter: blur(8px); z-index:-1; transition: background 0.5s ease; }
+body.dark-mode .bg-overlay { background: rgba(0,0,0,0.5); }
 
 /* ===== Top Pills ===== */
-.top-pill {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 16px;
-    border-radius: 999px;
-    background: rgba(255,255,255,0.5);
-    max-width: 90%;
-    margin: 16px auto 8px auto;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.25);
-    opacity: 0;
-    transform: translateY(-50px) scale(0);
-    animation: pillPopup 0.5s forwards;
-}
-.top-pill img {
-    width: 36px;
-    height: 36px;
-    object-fit: cover;
-    border-radius: 6px;
-}
-.top-pill span {
-    flex: 1;
-    text-align: center;
-    font-weight: bold;
-    font-size: 1rem;
-    color: #000;
-}
-.top-pill span.tech, .top-pill span.crop {
-    color: #000;
-}
-.dark-mode-btn {
-    width: 36px;
-    height: 36px;
-    display: grid;
-    place-items: center;
-    cursor: pointer;
-    transition: transform 0.2s ease;
-}
-.dark-mode-btn:hover { transform: scale(1.1); }
-.dark-mode-btn:active { transform: scale(0.95); }
-.dark-mode-btn svg {
-    width: 24px;
-    height: 24px;
-    stroke: #000;
-    fill: none;
-    stroke-width: 2;
-    transition: stroke 0.3s ease;
-}
-body.dark-mode .dark-mode-btn svg { stroke: #fff; }
+.top-pill { display:flex; align-items:center; gap:12px; padding:10px 16px; border-radius:999px; background: rgba(255,255,255,0.5); max-width:90%; margin:16px auto 8px auto; box-shadow:0 6px 18px rgba(0,0,0,0.25); opacity:0; transform: translateY(-50px) scale(0); animation: pillPopup 0.5s forwards;}
+.top-pill img { width:36px; height:36px; object-fit:cover; border-radius:6px; }
+.top-pill span { flex:1; text-align:center; font-weight:bold; font-size:1rem; color:#000; }
+.dark-mode-btn { width:36px; height:36px; display:grid; place-items:center; cursor:pointer; transition: transform 0.2s ease; }
+.dark-mode-btn:hover { transform:scale(1.1); } .dark-mode-btn:active { transform:scale(0.95); }
+.dark-mode-btn svg { width:24px; height:24px; stroke:#000; fill:none; stroke-width:2; transition:stroke 0.3s ease; }
+body.dark-mode .dark-mode-btn svg { stroke:#fff; }
+.second-pill { justify-content:center; background: rgba(255,255,255,0.5); }
 
-/* Second pill */
-.second-pill {
-    justify-content: center;
-    background: rgba(255,255,255,0.5);
-}
+/* ===== Camera ===== */
+.camera-shell { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%) scale(0); width:280px; height:380px; border-radius:44px; padding:12px; background: rgba(255,255,255,0.18); box-shadow:0 25px 60px rgba(0,0,0,0.35); opacity:0; animation: popupCamera 0.6s cubic-bezier(0.4,0,0.2,1) forwards; animation-delay:1.2s; }
+.camera-inner { width:100%; height:100%; border-radius:34px; overflow:hidden; background: rgba(255,255,255,0.75); position:relative; }
+video, canvas { width:100%; height:100%; object-fit:cover; }
 
-/* ===== Camera container ===== */
-.camera-shell {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) scale(0);
-    width: 280px;
-    height: 380px;
-    border-radius: 44px;
-    padding: 12px;
-    background: rgba(255,255,255,0.18);
-    box-shadow: 0 25px 60px rgba(0,0,0,0.35);
-    opacity: 0;
-    animation: popupCamera 0.6s cubic-bezier(0.4,0,0.2,1) forwards;
-    animation-delay: 1.2s;
-}
-@keyframes popupCamera {
-    0% { transform: translate(-50%, -50%) scale(0); opacity:0; }
-    60% { transform: translate(-50%, -50%) scale(1.1); opacity:1; }
-    100% { transform: translate(-50%, -50%) scale(1); opacity:1; }
-}
-@keyframes pillPopup {
-    0% { transform: translateY(-50px) scale(0); opacity: 0; }
-    100% { transform: translateY(0) scale(1); opacity: 1; }
-}
+/* ===== Bottom Pill ===== */
+.pill { position: fixed; bottom: 24px; left:50%; display:inline-flex; align-items:center; justify-content:center; gap:14px; padding:14px 22px; border-radius:999px; background: rgba(255,255,255,0.2); border:1px solid rgba(255,255,255,0.35); box-shadow:0 10px 30px rgba(0,0,0,0.3); opacity:0; transform:translateX(-50%) translateY(50px) scale(0); animation: bottomPillPopup 0.6s forwards; animation-delay:2s;}
+.pill button { all:unset; cursor:pointer; width:44px; height:44px; border-radius:50%; display:grid; place-items:center; position:relative; overflow:hidden; transition: transform 0.2s ease; outline:none; -webkit-tap-highlight-color: transparent; }
+.pill button:hover { transform: scale(1.08); } .pill button:active { transform: scale(0.95); }
+.divider { width:1px; height:22px; background: rgba(255,255,255,0.5); }
+.icon { width:22px; height:22px; stroke:white; stroke-width:2; fill:none; opacity:0.9; }
 
-.camera-inner {
-    width: 100%;
-    height: 100%;
-    border-radius: 34px;
-    overflow: hidden;
-    background: rgba(255,255,255,0.75);
-    position: relative;
-}
-
-video, canvas {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-/* ===== Bottom pill ===== */
-.pill {
-    position: fixed;
-    bottom: 24px;
-    left: 50%;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 14px;
-    padding: 14px 22px;
-    border-radius: 999px;
-    background: rgba(255,255,255,0.2);
-    border: 1px solid rgba(255,255,255,0.35);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-    opacity: 0;
-    transform: translateX(-50%) translateY(50px) scale(0);
-    animation: bottomPillPopup 0.6s forwards;
-    animation-delay: 2s;
-}
-@keyframes bottomPillPopup {
-    0% { transform: translateX(-50%) translateY(50px) scale(0); opacity:0; }
-    60% { transform: translateX(-50%) translateY(-10px) scale(1.05); opacity:1; }
-    100% { transform: translateX(-50%) translateY(0) scale(1); opacity:1; }
-}
-
-.pill button {
-    all: unset;
-    cursor: pointer;
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    display: grid;
-    place-items: center;
-    position: relative;
-    overflow: hidden;
-    transition: transform 0.2s ease;
-    outline: none;                     
-    -webkit-tap-highlight-color: transparent;
-}
-.pill button:hover { transform: scale(1.08); }
-.pill button:active { transform: scale(0.95); }
-
-.divider {
-    width: 1px;
-    height: 22px;
-    background: rgba(255,255,255,0.5);
-}
-
-.icon {
-    width: 22px;
-    height: 22px;
-    stroke: white;
-    stroke-width: 2;
-    fill: none;
-    opacity: 0.9;
-}
-
-/* ===== Adaptive ripple ===== */
-.ripple {
-    position: absolute;
-    border-radius: 50%;
-    transform: scale(0);
-    animation: rippleAnim 0.6s ease-out;
-    background: rgba(0,120,255,0.35);
-    pointer-events: none;
-}
-@keyframes rippleAnim { to { transform: scale(4); opacity: 0; } }
+/* ===== Ripple ===== */
+.ripple { position:absolute; border-radius:50%; transform:scale(0); animation:rippleAnim 0.6s ease-out; background: rgba(0,120,255,0.35); pointer-events:none; }
+@keyframes rippleAnim { to { transform:scale(4); opacity:0; } }
+@keyframes pillPopup {0% { transform: translateY(-50px) scale(0); opacity:0;} 100% { transform: translateY(0) scale(1); opacity:1;} }
+@keyframes popupCamera {0% { transform:translate(-50%,-50%) scale(0); opacity:0;} 60%{ transform:translate(-50%,-50%) scale(1.1); opacity:1;} 100% {transform:translate(-50%,-50%) scale(1); opacity:1;}}
+@keyframes bottomPillPopup {0% { transform: translateX(-50%) translateY(50px) scale(0); opacity:0;} 60% { transform: translateX(-50%) translateY(-10px) scale(1.05); opacity:1;} 100% {transform: translateX(-50%) translateY(0) scale(1); opacity:1;}}
 
 /* ===== Toast ===== */
-.toast {
-    position: fixed;
-    left: 50%;
-    transform: translateX(-50%);
-    bottom: 180px;  /* moved toast further down */
-    background: rgba(255,255,255,0.8);
-    padding: 8px 16px;
-    border-radius: 999px;
-    font-weight: bold;
-    color: #000;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease, transform 0.3s ease;
-    z-index: 10;
-    max-width: 60%;
-    text-align: center;
-}
-.toast.show {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-}
-body.dark-mode .toast { background: rgba(0,0,0,0.8); color: #fff; }
+.toast { position: fixed; bottom:180px; left:50%; transform:translateX(-50%); background: rgba(255,255,255,0.8); padding:8px 16px; border-radius:999px; font-weight:bold; color:#000; opacity:0; pointer-events:none; transition: opacity 0.3s ease, transform 0.3s ease; z-index:10; max-width:60%; text-align:center; }
+.toast.show { opacity:1; transform: translateX(-50%) translateY(0); }
+body.dark-mode .toast { background: rgba(0,0,0,0.8); color:#fff; }
 
 /* ===== RESULT POPUP ===== */
-#resultOverlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(255,255,255,0.5);
-    backdrop-filter: blur(8px);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-}
-#resultBox {
-    background: rgba(255,255,255,0.5);
-    padding: 20px;
-    border-radius: 22px;
-    width: 80%;
-    max-width: 350px;
-    text-align: center;
-    color: #000;
-    font-weight: bold;
-}
-#closePopup {
-    margin-top: 15px;
-    background: #ff7675;
-    color: #fff;
-    padding: 10px 14px;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-}
-#closePopup:hover { opacity: 0.85; }
+#resultOverlay { position: fixed; inset:0; background: rgba(255,255,255,0.5); backdrop-filter: blur(8px); display:none; align-items:center; justify-content:center; z-index:999; }
+#resultBox { background: rgba(255,255,255,0.9); padding:20px; border-radius:20px; width:80%; max-width:320px; color:#000; text-align:left; }
+#closePopup { margin-top:15px; background:#ff7675; padding:8px 12px; border:none; border-radius:12px; cursor:pointer; color:#fff; font-weight:bold; }
 
 </style>
 </head>
@@ -280,27 +77,18 @@ body.dark-mode .toast { background: rgba(0,0,0,0.8); color: #fff; }
     </div>
 </div>
 
-<!-- Bottom Pill with 3 buttons -->
+<!-- Bottom Pill -->
 <div class="pill">
     <button id="captureBtn" title="Capture">
-        <svg class="icon" viewBox="0 0 24 24">
-            <rect x="3" y="7" width="18" height="14" rx="3"/>
-            <circle cx="12" cy="14" r="4"/>
-        </svg>
+        <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="14" rx="3"/><circle cx="12" cy="14" r="4"/></svg>
     </button>
     <div class="divider"></div>
     <button id="uploadBtn" title="Upload">
-        <svg class="icon" viewBox="0 0 24 24">
-            <path d="M12 16V4"/>
-            <path d="M8 8l4-4 4 4"/>
-            <rect x="4" y="16" width="16" height="4" rx="1"/>
-        </svg>
+        <svg class="icon" viewBox="0 0 24 24"><path d="M12 16V4"/><path d="M8 8l4-4 4 4"/><rect x="4" y="16" width="16" height="4" rx="1"/></svg>
     </button>
     <div class="divider"></div>
     <button id="resultBtn" title="Result">
-        <svg class="icon" viewBox="0 0 24 24">
-            <path d="M4 6h16M4 12h16M4 18h16"/>
-        </svg>
+        <svg class="icon" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
     </button>
 </div>
 
@@ -310,7 +98,7 @@ body.dark-mode .toast { background: rgba(0,0,0,0.8); color: #fff; }
 <!-- Result Popup -->
 <div id="resultOverlay">
     <div id="resultBox">
-        <h3>Detection Result</h3>
+        <h3>Result</h3>
         <p id="popupResult">Loading...</p>
         <button id="closePopup">Close</button>
     </div>
@@ -330,34 +118,34 @@ const closePopup = document.getElementById("closePopup");
 
 let capturedImage = null;
 
-/* ---------- CAMERA ---------- */
+/* CAMERA */
 navigator.mediaDevices.getUserMedia({ video: true })
 .then(stream => video.srcObject = stream)
-.catch(err => showToast("Camera blocked ❌"));
+.catch(() => showToast("Camera blocked ❌"));
 
-/* ---------- Adaptive Ripple ---------- */
-function createRipple(e, button) {
+/* TOAST */
+function showToast(msg){
+    toast.innerText = msg;
+    toast.style.display="block";
+    setTimeout(()=>toast.style.display="none",2000);
+}
+
+/* RIPPLE */
+function createRipple(e, button){
     const ripple = document.createElement("span");
     ripple.classList.add("ripple");
     const rect = button.getBoundingClientRect();
     const size = Math.max(rect.width, rect.height);
-    ripple.style.width = ripple.style.height = size + "px";
-    ripple.style.left = e.clientX - rect.left - size/2 + "px";
-    ripple.style.top = e.clientY - rect.top - size/2 + "px";
+    ripple.style.width = ripple.style.height = size+"px";
+    ripple.style.left = e.clientX - rect.left - size/2 +"px";
+    ripple.style.top = e.clientY - rect.top - size/2 +"px";
     ripple.style.borderRadius = window.getComputedStyle(button).borderRadius;
     button.appendChild(ripple);
-    setTimeout(()=>ripple.remove(), 600);
+    setTimeout(()=>ripple.remove(),600);
 }
 
-/* ---------- TOAST ---------- */
-function showToast(msg) {
-    toast.innerText = msg;
-    toast.style.display = "block";
-    setTimeout(() => toast.style.display = "none", 2000);
-}
-
-/* ---------- CAPTURE ---------- */
-captureBtn.onclick = (e) => {
+/* CAPTURE */
+captureBtn.onclick = (e)=>{
     createRipple(e,captureBtn);
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
@@ -366,37 +154,37 @@ captureBtn.onclick = (e) => {
     showToast("Photo Captured 📸");
 };
 
-/* ---------- UPLOAD ---------- */
-uploadBtn.onclick = async (e) => {
+/* UPLOAD */
+uploadBtn.onclick = (e)=>{
     createRipple(e,uploadBtn);
-    if(!capturedImage){ showToast("Capture photo first"); return;}
-    const res = await fetch("https://crop-disease-api.onrender.com/predict", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ image: capturedImage })
-});
-
-    showToast("Photo Uploaded ✅");
+    if(!capturedImage){ showToast("Capture photo first"); return; }
+    fetch("https://flask-backend-api-vg8r.onrender.com/upload", {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({image:capturedImage})
+    }).then(()=>showToast("Photo Uploaded ✅"))
+    .catch(()=>showToast("Upload failed ❌"));
 };
 
-/* ---------- RESULT POPUP ---------- */
-resultBtn.onclick = async (e) => {
+/* RESULT */
+resultBtn.onclick = async (e)=>{
     createRipple(e,resultBtn);
-    if(!capturedImage){ showToast("Capture photo first"); return;}
-    overlay.style.display = "flex";
-    popupResult.innerText = "Analyzing image… 🌱";
+    if(!capturedImage){ showToast("Capture photo first ⚠️"); return; }
+
+    overlay.style.display="flex";
+    popupResult.innerText="Analyzing image… 🌱";
 
     try {
         const res = await fetch("https://flask-backend-api-vg8r.onrender.com/predict", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ image: capturedImage })
-});
+            method:"POST",
+            headers:{"Content-Type":"application/json"},
+            body: JSON.stringify({image:capturedImage})
+        });
         const data = await res.json();
-        if(data.disease === "Not a plant") {
+        if(data.disease === "not_plant"){
             popupResult.innerText = "Please show crops or plants 🌿";
         } else {
-            popupResult.innerText = "Disease: " + data.disease + "\nConfidence: " + data.confidence + "%";
+            popupResult.innerText = "Disease: "+data.disease+"\nConfidence: "+data.confidence+"%";
         }
     } catch(err){
         console.error(err);
@@ -404,17 +192,15 @@ resultBtn.onclick = async (e) => {
     }
 };
 
-/* ---------- CLOSE POPUP ---------- */
-closePopup.onclick = () => overlay.style.display = "none";
+/* CLOSE POPUP */
+closePopup.onclick = ()=>overlay.style.display="none";
 
-/* ---------- DARK MODE ---------- */
-darkBtn.onclick = () => {
+/* DARK MODE */
+darkBtn.onclick = ()=>{
     document.body.classList.toggle("dark-mode");
-    showToast(document.body.classList.contains("dark-mode") ? "Dark Mode 🌙":"Light Mode ☀️");
+    showToast(document.body.classList.contains("dark-mode")?"Dark Mode 🌙":"Light Mode ☀️");
 };
-</script>
 
+</script>
 </body>
 </html>
-
-
